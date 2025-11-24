@@ -21,6 +21,28 @@ let timeLeft = 120;
 
 const videoEmbed = `<iframe width="560" height="315" 
   src="https://www.youtube.com/embed/C0DPdy98e4c?autoplay=1&controls=0&modestbranding=1&mute=1"
-  frameborder="0" allow="autoplay; encrypted-media" allowr = setInterval(() => {
+  frameborder="0" allowmbed;
+
+function startTimer() {
+  const timer = setInterval(() => {
     document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
     if (timeLeft <= 0) {
+      clearInterval(timer);
+      if (page < 3) {
+        page++;
+        timeLeft = 120;
+        document.getElementById('content').innerHTML = videoEmbed;
+        startTimer();
+      } else {
+        document.getElementById('content').innerHTML = "<h2>All done! Thank you.</h2>";
+        document.getElementById('timer').innerText = "";
+      }
+    }
+    timeLeft--;
+  }, 1000);
+}
+
+startTimer();
+</script>
+</body>
+</html>
