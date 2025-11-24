@@ -16,18 +16,18 @@
 <div id="content"></div>
 
 <script>
-const videoEmbed = `<iframe width="560" height="315" 
-  src="https://www.youtube.com/embed/C0DPdy98e4c?autoplay=1&controls=0&modestbranding=1&mute= seconds per page
-document.getElementById('content').innerHTML = videoEmbed;
+let page = 1;
+let timeLeft = 120;
 
-function startTimer() {
-  const timer = setInterval(() => {
+const videoEmbed = `<iframe width="560" height="315" 
+  src="https://www.youtube.com/embed/C0DPdy98e4c?autoplay=1&controls=0&modestbranding=1&mute=1"
+  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen = setInterval(() => {
     document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
     if (timeLeft <= 0) {
       clearInterval(timer);
       if (page < 3) {
         page++;
-        timeLeft = 120; // reset timer for next page
+        timeLeft = 120;
         document.getElementById('content').innerHTML = videoEmbed;
         startTimer();
       } else {
@@ -42,4 +42,3 @@ function startTimer() {
 startTimer();
 </script>
 </body>
-</html>
