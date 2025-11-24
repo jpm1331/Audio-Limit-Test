@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Timed Audio Pages</title>
+<title>Video-Paced Audio Pages</title>
 <style>
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   
-  /* 🛑 CRITICAL CHANGE 1: Hide the video content initially */
+  /* CRITICAL CHANGE 1: Hide the video content initially */
   #content { display: none; } 
   
   /* NEW: Style for the start button */
@@ -42,8 +42,6 @@
 
 <script>
 let page = 1;
-let timeLeft = 120;
-let timer; // Defined globally for control
 
 // --- Video Setup ---
 const videoHTML = `
@@ -60,12 +58,34 @@ const videoHTML = `
   </video>
 `;
 
-// Global handler for when the video naturally finishes playing
+// 🛑 CRITICAL CHANGE 1: Modified handleVideoEnd to advance pages.
 function handleVideoEnd() {
-    document.getElementById('content').innerHTML = "<h2>Video has finished.</h2>";
+    
+    if (page < 3) {
+        // Advance to the next page number
+        page++;
+        document.getElementById('timer').innerText = `Page ${page} active.`;
+
+        // Note: The video has already ended. If you need it to play a *new* segment 
+        // after this point, you will need to replace the video file path or use 
+        // JavaScript to seek to the next segment's start time.
+        
+        // **If you are only changing the text/task based on the video's total length:**
+        // You might want to display a new question/text here for Page 2, Page 3, etc.
+        
+        // For now, we only update the counter text.
+        document.getElementById('content').innerHTML = `<h2>Page ${page}: Listening Task Active...</h2>`;
+
+
+    } else {
+        // Task complete after 3 pages
+        document.getElementById('content').innerHTML = "<h2>All sections complete. Thank you.</h2>";
+        document.getElementById('timer').innerText = "";
+    }
 }
 
-// 🛑 CRITICAL CHANGE 3: NEW FUNCTION to start the task on button click
+
+// --- FUNCTION to start the task on button click ---
 function startTask() {
     const startContainer = document.getElementById('startContainer');
     const content = document.getElementById('content');
@@ -73,9 +93,10 @@ function startTask() {
     // 1. Hide the button and show the video container
     startContainer.style.display = 'none';
     content.style.display = 'block';
-
+    
     // 2. Insert the video HTML (which is now done *after* the click)
     content.innerHTML = videoHTML;
+    document.getElementById('timer').innerText = `Page ${page} active.`;
 
     // 3. Get the video element and manually call play()
     const videoElement = document.getElementById('listeningVideo');
@@ -87,9 +108,6 @@ function startTask() {
     if (videoElement.readyState >= 1) {
         attemptPlayback();
     }
-
-    // 4. Start the timer sequence
-    startTimer();
 }
 
 // Helper function for reliable playback
@@ -98,41 +116,14 @@ function attemptPlayback() {
     videoElement.play().catch(error => {
         console.error("Video playback failed:", error);
     });
-    // Remove the event listener after the first attempt to prevent multiple triggers
+    // Remove the event listener after the first attempt
     videoElement.removeEventListener('loadedmetadata', attemptPlayback);
 }
 
 
-// --- Timer Setup (Remains the same) ---
-function startTimer() {
-  const maxTime = 120;
-  
-  if (timer) clearInterval(timer); 
-
-  timer = setInterval(() => {
-    document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
-    
-    if (timeLeft <= 0) {
-      clearInterval(timer); 
-      
-      if (page < 3) {
-        page++;
-        timeLeft = maxTime; 
-        startTimer(); 
-      } else {
-        document.getElementById('content').innerHTML += "<h2>All time segments complete.</h2>";
-        document.getElementById('timer').innerText = "";
-      }
-    }
-    
-    timeLeft--;
-  }, 1000); 
-}
-
-// 🛑 CRITICAL CHANGE 4: The DOMContentLoaded only sets the initial message
+// 🛑 CRITICAL CHANGE 2: Removed startTimer() and cleaned up DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('timer').innerText = `Click 'Start' to begin.`;
-    // The task logic is now entirely inside startTask()
 });
 </script>
 </body>
