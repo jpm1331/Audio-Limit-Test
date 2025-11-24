@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Timed Audio Page</title>
+<title>Timed Audio Pages</title>
 <style>
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
@@ -12,23 +12,35 @@
 </head>
 <body>
 <h1>Listening Task</h1>
-<div id="timer">120 seconds left</div>
-<div id="content">
-  https://www.youtube.com/embed/VIDEO_ID?autoplay=1&controls=0&modestbranding=1</iframe>
-  <p>Answer the question below before time runs out:</p>
-  <textarea rows="4" cols="50" placeholder="Type your answer here..."></textarea>
-</div>
+<div id="timer"></div>
+<div id="content"></div>
 
 <script>
-let timeLeft = 120; // seconds
-const timer = setInterval(() => {
-  document.getElementById('timer').innerText = timeLeft + ' seconds left';
-  if (timeLeft <= 0) {
-    clearInterval(timer);
-    document.getElementById('content').innerHTML = "<h2>Time is up! Moving on...</h2>";
-  }
-  timeLeft--;
-}, 1000);
+const videoEmbed = `<iframe width="560" height="315" 
+  src="https://www.youtube.com/watch?v=C0DPdy98e4c" 
+  frameborderper page (change to 120 for 2 mins)
+document.getElementById('content').innerHTML = videoEmbed;
+
+function startTimer() {
+  const timer = setInterval(() => {
+    document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      if (page < 3) {
+        page++;
+        timeLeft = 10; // reset timer for next page
+        document.getElementById('content').innerHTML = videoEmbed;
+        startTimer();
+      } else {
+        document.getElementById('content').innerHTML = "<h2>All done! Thank you.</h2>";
+        document.getElementById('timer').innerText = "";
+      }
+    }
+    timeLeft--;
+  }, 1000);
+}
+
+startTimer();
 </script>
 </body>
 </html>
