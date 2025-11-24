@@ -21,10 +21,7 @@ let timeLeft = 120;
 
 const videoEmbed = `<iframe width="560" height="315" 
   src="https://www.youtube.com/embed/C0DPdy98e4c?autoplay=1&controls=0&modestbranding=1&mute=1"
-  frameborder="0" allowmbed;
-
-function startTimer() {
-  const timer = setInterval(() => {
+  frameborder="0" allow="autoplay; encrypted-media" allowfullscreenerval(() => {
     document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
     if (timeLeft <= 0) {
       clearInterval(timer);
