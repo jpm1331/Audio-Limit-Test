@@ -7,7 +7,7 @@
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   
-  /* Initially hide the video content */
+  /* CRITICAL CSS: Hide the video content initially */
   #content { display: none; } 
   
   #startButton {
@@ -41,6 +41,7 @@
 
 <script>
 let page = 1;
+let totalPages = 3; // Set the total number of loops
 
 // --- Video Template ---
 const videoHTML = `
@@ -62,15 +63,15 @@ function startTask() {
     const startContainer = document.getElementById('startContainer');
     const content = document.getElementById('content');
 
-    // Hide Button, Show Video
+    // 1. Hide Button, Show Video Container
     startContainer.style.display = 'none';
     content.style.display = 'block';
 
-    // Insert the video (Fresh copy every time)
+    // 2. Insert the video (Fresh copy for a clean start)
     content.innerHTML = videoHTML;
     document.getElementById('timer').innerText = `Page ${page} playing...`;
 
-    // Play Logic
+    // 3. Play Logic
     const videoElement = document.getElementById('listeningVideo');
     videoElement.addEventListener('loadedmetadata', attemptPlayback);
     if (videoElement.readyState >= 1) attemptPlayback();
@@ -82,15 +83,15 @@ function handleVideoEnd() {
     const content = document.getElementById('content');
     const button = document.getElementById('startButton');
 
-    if (page < 3) {
-        // --- THE RESET LOGIC ---
-        page++; // Increase page number
+    if (page < totalPages) {
+        // --- THE RELIABLE RESET LOGIC ---
+        page++; // Advance to the next page number
 
-        // 1. Hide the video container again
-        content.style.display = 'none';
-        content.innerHTML = ""; // Clear the old video to save memory
+        // 1. Clear the old video and hide the content container
+        content.innerHTML = "";
+        content.style.display = 'none'; 
 
-        // 2. Update the button and timer text
+        // 2. Update button and timer text for the next page
         button.innerText = `Start Page ${page}`;
         document.getElementById('timer').innerText = `Page ${page - 1} finished. Click below for Page ${page}.`;
 
@@ -98,14 +99,14 @@ function handleVideoEnd() {
         startContainer.style.display = 'block';
 
     } else {
-        // --- ALL DONE LOGIC ---
-        content.innerHTML = "<h2>All 3 Pages Complete. Thank you.</h2>";
+        // --- ALL DONE LOGIC (Final completion) ---
+        content.innerHTML = "<h2>All " + totalPages + " Pages Complete. Thank you.</h2>";
         document.getElementById('timer').innerText = "";
-        startContainer.style.display = 'none'; // Ensure button stays hidden
+        startContainer.style.display = 'none'; 
     }
 }
 
-// Helper for playback
+// Helper function for reliable playback
 function attemptPlayback() {
     const videoElement = document.getElementById('listeningVideo');
     if(videoElement) {
