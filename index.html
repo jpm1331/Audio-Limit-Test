@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Video-Paced Audio Pages</title>
+<title>Repeating Audio Pages</title>
 <style>
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   
-  /* 🛑 CRITICAL CSS: Hide the video container until the button is clicked */
+  /* Initially hide the video content */
   #content { display: none; } 
   
-  /* NEW: Style for the start button */
   #startButton {
     padding: 15px 30px;
     font-size: 20px;
@@ -21,7 +20,7 @@
     border-radius: 5px;
   }
 
-  /* CSS to prevent native video controls from appearing on hover/focus */
+  /* CSS to hide native video controls */
   .video-hidden::-webkit-media-controls-enclosure {
     display: none !important;
   }
@@ -35,7 +34,7 @@
 <div id="timer"></div>
 
 <div id="startContainer">
-  <button id="startButton" onclick="startTask()">Start Listening Task</button>
+  <button id="startButton" onclick="startTask()">Start Page 1</button>
 </div>
 
 <div id="content"></div>
@@ -43,7 +42,7 @@
 <script>
 let page = 1;
 
-// --- Video Setup ---
+// --- Video Template ---
 const videoHTML = `
   <video 
     id="listeningVideo" 
@@ -58,66 +57,66 @@ const videoHTML = `
   </video>
 `;
 
-// Global handler for when the video naturally finishes playing (end of task assumed)
-function handleVideoEnd() {
-    
-    if (page < 3) {
-        // Increment page counter and update message, but the task is continuous
-        page++;
-        document.getElementById('timer').innerText = `Page ${page} active.`;
-
-        // If you need to change the content/questions for the next segment, 
-        // you would do it here. For now, we update the task text.
-        document.getElementById('content').innerHTML = `<h2>Page ${page}: Listening Task Active...</h2>`;
-
-    } else {
-        // Task complete after 3 conceptual pages
-        document.getElementById('content').innerHTML = "<h2>All sections complete. Thank you.</h2>";
-        document.getElementById('timer').innerText = "";
-    }
-}
-
-
-// --- FUNCTION to start the task on button click (linked by onclick="startTask()") ---
+// --- 1. START FUNCTION (Triggered by button) ---
 function startTask() {
     const startContainer = document.getElementById('startContainer');
     const content = document.getElementById('content');
 
-    // 1. Hide the button and show the video container
+    // Hide Button, Show Video
     startContainer.style.display = 'none';
     content.style.display = 'block';
-    
-    // 2. Insert the video HTML 
-    content.innerHTML = videoHTML;
-    document.getElementById('timer').innerText = `Page ${page} active.`;
 
-    // 3. Get the video element and manually call play()
+    // Insert the video (Fresh copy every time)
+    content.innerHTML = videoHTML;
+    document.getElementById('timer').innerText = `Page ${page} playing...`;
+
+    // Play Logic
     const videoElement = document.getElementById('listeningVideo');
-    
-    // Use the loadedmetadata event for robust playback assurance
     videoElement.addEventListener('loadedmetadata', attemptPlayback);
-    
-    // Fallback/immediate attempt if metadata is already loaded
-    if (videoElement.readyState >= 1) {
-        attemptPlayback();
+    if (videoElement.readyState >= 1) attemptPlayback();
+}
+
+// --- 2. END FUNCTION (Triggered when video finishes) ---
+function handleVideoEnd() {
+    const startContainer = document.getElementById('startContainer');
+    const content = document.getElementById('content');
+    const button = document.getElementById('startButton');
+
+    if (page < 3) {
+        // --- THE RESET LOGIC ---
+        page++; // Increase page number
+
+        // 1. Hide the video container again
+        content.style.display = 'none';
+        content.innerHTML = ""; // Clear the old video to save memory
+
+        // 2. Update the button and timer text
+        button.innerText = `Start Page ${page}`;
+        document.getElementById('timer').innerText = `Page ${page - 1} finished. Click below for Page ${page}.`;
+
+        // 3. Show the button container again
+        startContainer.style.display = 'block';
+
+    } else {
+        // --- ALL DONE LOGIC ---
+        content.innerHTML = "<h2>All 3 Pages Complete. Thank you.</h2>";
+        document.getElementById('timer').innerText = "";
+        startContainer.style.display = 'none'; // Ensure button stays hidden
     }
 }
 
-// Helper function for reliable playback
+// Helper for playback
 function attemptPlayback() {
     const videoElement = document.getElementById('listeningVideo');
-    videoElement.play().catch(error => {
-        console.error("Video playback failed:", error);
-    });
-    // Remove the event listener after the first attempt
-    videoElement.removeEventListener('loadedmetadata', attemptPlayback);
+    if(videoElement) {
+        videoElement.play().catch(e => console.error(e));
+        videoElement.removeEventListener('loadedmetadata', attemptPlayback);
+    }
 }
 
-
-// --- Initial Setup ---
+// Initial Setup
 document.addEventListener('DOMContentLoaded', () => {
-    // Set initial text on the timer display
-    document.getElementById('timer').innerText = `Click 'Start' to begin.`;
+    document.getElementById('timer').innerText = "Click 'Start' to begin Page 1.";
 });
 </script>
 </body>
