@@ -6,7 +6,20 @@
 <style>
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
-  #content { display: block; }
+  
+  /* 🛑 CRITICAL CHANGE 1: Hide the video content initially */
+  #content { display: none; } 
+  
+  /* NEW: Style for the start button */
+  #startButton {
+    padding: 15px 30px;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
 
   /* CSS to prevent native video controls from appearing on hover/focus */
   .video-hidden::-webkit-media-controls-enclosure {
@@ -20,11 +33,17 @@
 <body>
 <h1>Listening Task</h1>
 <div id="timer"></div>
+
+<div id="startContainer">
+  <button id="startButton" onclick="startTask()">Start Listening Task</button>
+</div>
+
 <div id="content"></div>
 
 <script>
 let page = 1;
-let timeLeft = 120; 
+let timeLeft = 120;
+let timer; // Defined globally for control
 
 // --- Video Setup ---
 const videoHTML = `
@@ -32,7 +51,6 @@ const videoHTML = `
     id="listeningVideo" 
     width="560" 
     height="315" 
-    autoplay 
     class="video-hidden" 
     onended="handleVideoEnd()" 
     playsinline
@@ -44,44 +62,77 @@ const videoHTML = `
 
 // Global handler for when the video naturally finishes playing
 function handleVideoEnd() {
-    // This removes the video and shows a message when the audio concludes
     document.getElementById('content').innerHTML = "<h2>Video has finished.</h2>";
 }
 
-// --- Timer Setup ---
-// The timer runs independently of the video's actual length.
+// 🛑 CRITICAL CHANGE 3: NEW FUNCTION to start the task on button click
+function startTask() {
+    const startContainer = document.getElementById('startContainer');
+    const content = document.getElementById('content');
+
+    // 1. Hide the button and show the video container
+    startContainer.style.display = 'none';
+    content.style.display = 'block';
+
+    // 2. Insert the video HTML (which is now done *after* the click)
+    content.innerHTML = videoHTML;
+
+    // 3. Get the video element and manually call play()
+    const videoElement = document.getElementById('listeningVideo');
+    
+    // Use the loadedmetadata event for robust playback assurance
+    videoElement.addEventListener('loadedmetadata', attemptPlayback);
+    
+    // Fallback/immediate attempt if metadata is already loaded
+    if (videoElement.readyState >= 1) {
+        attemptPlayback();
+    }
+
+    // 4. Start the timer sequence
+    startTimer();
+}
+
+// Helper function for reliable playback
+function attemptPlayback() {
+    const videoElement = document.getElementById('listeningVideo');
+    videoElement.play().catch(error => {
+        console.error("Video playback failed:", error);
+    });
+    // Remove the event listener after the first attempt to prevent multiple triggers
+    videoElement.removeEventListener('loadedmetadata', attemptPlayback);
+}
+
+
+// --- Timer Setup (Remains the same) ---
 function startTimer() {
   const maxTime = 120;
   
-  let timer = setInterval(() => {
-    // Update the counter text
+  if (timer) clearInterval(timer); 
+
+  timer = setInterval(() => {
     document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
     
     if (timeLeft <= 0) {
-      clearInterval(timer); // Stop the current timer
+      clearInterval(timer); 
       
       if (page < 3) {
-        // Advance to the next page and restart
         page++;
         timeLeft = maxTime; 
         startTimer(); 
       } else {
-        // Task complete after 3 pages
         document.getElementById('content').innerHTML += "<h2>All time segments complete.</h2>";
         document.getElementById('timer').innerText = "";
       }
     }
     
-    timeLeft--; // Decrease time left by 1 second
+    timeLeft--;
   }, 1000); 
 }
 
+// 🛑 CRITICAL CHANGE 4: The DOMContentLoaded only sets the initial message
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Insert the video HTML into the content area
-    document.getElementById('content').innerHTML = videoHTML;
-    
-    // 2. Start the counting sequence
-    startTimer();
+    document.getElementById('timer').innerText = `Click 'Start' to begin.`;
+    // The task logic is now entirely inside startTask()
 });
 </script>
 </body>
