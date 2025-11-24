@@ -7,6 +7,14 @@
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   #content { display: block; }
+
+  /* CSS to prevent native video controls from appearing on hover/focus */
+  .video-hidden::-webkit-media-controls-enclosure {
+    display: none !important;
+  }
+  .video-hidden::-moz-media-controls-enclosure {
+    display: none !important;
+  }
 </style>
 </head>
 <body>
@@ -16,42 +24,63 @@
 
 <script>
 let page = 1;
-let timeLeft = 120; // 120 seconds = 2 minutes
+let timeLeft = 120; 
 
-// 1. Correctly define and CLOSE the video embed string
-const videoEmbed = `<iframe width="560" height="315" 
-  src="https://www.youtube.com/embed/C0DPdy98e4c?autoplay=1&controls=0&modestbranding=1&mute=1"
-  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`; // <-- CLOSED!
+// --- Video Setup ---
+const videoHTML = `
+  <video 
+    id="listeningVideo" 
+    width="560" 
+    height="315" 
+    autoplay 
+    class="video-hidden" 
+    onended="handleVideoEnd()" 
+    playsinline
+  >
+    <source src="video.mp4" type="video/mp4"> 
+    Your browser does not support the video tag.
+  </video>
+`;
 
-// 2. Correctly define the function
+// Global handler for when the video naturally finishes playing
+function handleVideoEnd() {
+    // This removes the video and shows a message when the audio concludes
+    document.getElementById('content').innerHTML = "<h2>Video has finished.</h2>";
+}
+
+// --- Timer Setup ---
+// The timer runs independently of the video's actual length.
 function startTimer() {
-  const maxTime = 120; 
+  const maxTime = 120;
   
-  const timer = setInterval(() => {
-    // 3. This line is now safe inside the function
+  let timer = setInterval(() => {
+    // Update the counter text
     document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
     
     if (timeLeft <= 0) {
-      clearInterval(timer); 
+      clearInterval(timer); // Stop the current timer
       
       if (page < 3) {
+        // Advance to the next page and restart
         page++;
         timeLeft = maxTime; 
-        // NOTE: We do not reload content here to avoid the CSP warning.
         startTimer(); 
       } else {
-        document.getElementById('content').innerHTML = "<h2>All done! Thank you.</h2>";
+        // Task complete after 3 pages
+        document.getElementById('content').innerHTML += "<h2>All time segments complete.</h2>";
         document.getElementById('timer').innerText = "";
       }
     }
     
-    timeLeft--; 
+    timeLeft--; // Decrease time left by 1 second
   }, 1000); 
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Insert the video once on page load
-    document.getElementById('content').innerHTML = videoEmbed;
+    // 1. Insert the video HTML into the content area
+    document.getElementById('content').innerHTML = videoHTML;
+    
+    // 2. Start the counting sequence
     startTimer();
 });
 </script>
