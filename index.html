@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Timed Audio Page</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+  #timer { font-size: 24px; color: red; margin-bottom: 20px; }
+  #content { display: block; }
+</style>
+</head>
+<body>
+<h1>Listening Task</h1>
+<div id="timer">120 seconds left</div>
+<div id="content">
+  https://www.youtube.com/embed/VIDEO_ID?autoplay=1&controls=0&modestbranding=1</iframe>
+  <p>Answer the question below before time runs out:</p>
+  <textarea rows="4" cols="50" placeholder="Type your answer here..."></textarea>
+</div>
+
+<script>
+let timeLeft = 120; // seconds
+const timer = setInterval(() => {
+  document.getElementById('timer').innerText = timeLeft + ' seconds left';
+  if (timeLeft <= 0) {
+    clearInterval(timer);
+    document.getElementById('content').innerHTML = "<h2>Time is up! Moving on...</h2>";
+  }
+  timeLeft--;
+}, 1000);
+</script>
+</body>
+</html>
