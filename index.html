@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,29 +16,44 @@
 
 <script>
 let page = 1;
-let timeLeft = 120;
+let timeLeft = 120; // 120 seconds = 2 minutes
 
+// Correctly defined video embed code, using a template literal (backticks)
 const videoEmbed = `<iframe width="560" height="315" 
   src="https://www.youtube.com/embed/C0DPdy98e4c?autoplay=1&controls=0&modestbranding=1&mute=1"
-  frameborder="0" allow="autoplay; encrypted-media" allowfullscreenerval(() => {
+  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`; // <-- The backtick (`) closes the string here
+
+function startTimer() {
+  // Define timer inside the function so we can use clearInterval on the locally scoped variable
+  const timer = setInterval(() => {
     document.getElementById('timer').innerText = `Page ${page}: ${timeLeft} seconds left`;
+    
     if (timeLeft <= 0) {
-      clearInterval(timer);
+      clearInterval(timer); // Stop the current timer
+      
       if (page < 3) {
+        // Advance to the next page
         page++;
-        timeLeft = 120;
-        document.getElementById('content').innerHTML = videoEmbed;
-        startTimer();
+        timeLeft = 120; // Reset timer for the next page
+        document.getElementById('content').innerHTML = videoEmbed; // Load content for the next page
+        startTimer(); // Start the timer again
       } else {
+        // Task complete after 3 pages
         document.getElementById('content').innerHTML = "<h2>All done! Thank you.</h2>";
         document.getElementById('timer').innerText = "";
       }
     }
-    timeLeft--;
-  }, 1000);
+    
+    timeLeft--; // Decrease time left by 1 second
+  }, 1000); // Run every 1000 milliseconds (1 second)
 }
 
-startTimer();
+// Ensure the DOM is fully loaded before trying to access elements
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial setup for the first page
+    document.getElementById('content').innerHTML = videoEmbed;
+    startTimer();
+});
 </script>
 </body>
 </html>
