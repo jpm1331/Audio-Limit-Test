@@ -7,7 +7,7 @@
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   
-  /* CRITICAL CHANGE 1: Hide the video content initially */
+  /* 🛑 CRITICAL CSS: Hide the video container until the button is clicked */
   #content { display: none; } 
   
   /* NEW: Style for the start button */
@@ -58,34 +58,27 @@ const videoHTML = `
   </video>
 `;
 
-// 🛑 CRITICAL CHANGE 1: Modified handleVideoEnd to advance pages.
+// Global handler for when the video naturally finishes playing (end of task assumed)
 function handleVideoEnd() {
     
     if (page < 3) {
-        // Advance to the next page number
+        // Increment page counter and update message, but the task is continuous
         page++;
         document.getElementById('timer').innerText = `Page ${page} active.`;
 
-        // Note: The video has already ended. If you need it to play a *new* segment 
-        // after this point, you will need to replace the video file path or use 
-        // JavaScript to seek to the next segment's start time.
-        
-        // **If you are only changing the text/task based on the video's total length:**
-        // You might want to display a new question/text here for Page 2, Page 3, etc.
-        
-        // For now, we only update the counter text.
+        // If you need to change the content/questions for the next segment, 
+        // you would do it here. For now, we update the task text.
         document.getElementById('content').innerHTML = `<h2>Page ${page}: Listening Task Active...</h2>`;
 
-
     } else {
-        // Task complete after 3 pages
+        // Task complete after 3 conceptual pages
         document.getElementById('content').innerHTML = "<h2>All sections complete. Thank you.</h2>";
         document.getElementById('timer').innerText = "";
     }
 }
 
 
-// --- FUNCTION to start the task on button click ---
+// --- FUNCTION to start the task on button click (linked by onclick="startTask()") ---
 function startTask() {
     const startContainer = document.getElementById('startContainer');
     const content = document.getElementById('content');
@@ -94,7 +87,7 @@ function startTask() {
     startContainer.style.display = 'none';
     content.style.display = 'block';
     
-    // 2. Insert the video HTML (which is now done *after* the click)
+    // 2. Insert the video HTML 
     content.innerHTML = videoHTML;
     document.getElementById('timer').innerText = `Page ${page} active.`;
 
@@ -121,8 +114,9 @@ function attemptPlayback() {
 }
 
 
-// 🛑 CRITICAL CHANGE 2: Removed startTimer() and cleaned up DOMContentLoaded
+// --- Initial Setup ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Set initial text on the timer display
     document.getElementById('timer').innerText = `Click 'Start' to begin.`;
 });
 </script>
