@@ -80,4 +80,112 @@
 const videoFiles = [
   "Plane Clip 1.mp4", "Plane Clip 2.mp4", "Plane Clip 3.mp4", "Plane Clip 4.mp4", "Plane Clip 5.mp4",
   "Train Clip 1.mp4", "Train Clip 2.mp4", "Train Clip 3.mp4", "Train Clip 4.mp4", "Train Clip 5.mp4",
-  "Dance Clip 1.mp4", "Dance Clip 2.mp4", "Dance Clip 3.mp4", "Dance Clip 4.mp4
+  "Dance Clip 1.mp4", "Dance Clip 2.mp4", "Dance Clip 3.mp4", "Dance Clip 4.mp4", "Dance Clip 5.mp4"
+];
+
+let videoIndex = 0;    
+let repeatCount = 1;   
+const totalRepeats = 3;
+
+function updateInstructionText() {
+    const instructionBox = document.getElementById('instructionBox');
+    const currentFile = videoFiles[videoIndex];
+    instructionBox.style.display = "block";
+
+    if (currentFile.startsWith("Plane")) {
+        instructionBox.innerText = "In the next five clips, we are discussing plane travel";
+    } else if (currentFile.startsWith("Train")) {
+        instructionBox.innerText = "In the next five clips, we are discussing train travel";
+    } else if (currentFile.startsWith("Dance")) {
+        instructionBox.innerText = "In the next five clips, we are discussing our wheelchair dance club";
+    }
+}
+
+function getVideoHTML(videoSrc) {
+  return `
+    <video 
+      id="listeningVideo" 
+      width="560" 
+      height="315" 
+      class="video-hidden" 
+      onended="handleVideoEnd()" 
+      playsinline
+    >
+      <source src="${videoSrc}" type="video/mp4"> 
+      Your browser does not support the video tag.
+    </video>
+  `;
+}
+
+function startTask() {
+    const startContainer = document.getElementById('startContainer');
+    const content = document.getElementById('content');
+    const overlay = document.getElementById('pageOverlay');
+    const currentFile = videoFiles[videoIndex];
+    
+    // Remove .mp4 for the display text
+    const cleanName = currentFile.replace('.mp4', '');
+
+    startContainer.style.display = 'none';
+    content.style.display = 'block';
+
+    updateInstructionText();
+
+    overlay.innerText = "Video " + (videoIndex + 1);
+
+    document.getElementById('videoPlaceholder').innerHTML = getVideoHTML(currentFile);
+    
+    // Updated text to use cleanName
+    document.getElementById('timer').innerText = `Playing ${cleanName} (Attempt ${repeatCount} of ${totalRepeats})`;
+
+    const videoElement = document.getElementById('listeningVideo');
+    videoElement.addEventListener('loadedmetadata', attemptPlayback);
+    if (videoElement.readyState >= 1) attemptPlayback();
+}
+
+function handleVideoEnd() {
+    const startContainer = document.getElementById('startContainer');
+    const content = document.getElementById('content');
+    const button = document.getElementById('startButton');
+
+    if (repeatCount < totalRepeats) {
+        repeatCount++;
+    } else {
+        videoIndex++;
+        repeatCount = 1;
+    }
+
+    if (videoIndex < videoFiles.length) {
+        document.getElementById('videoPlaceholder').innerHTML = "";
+        content.style.display = 'none'; 
+
+        const nextFile = videoFiles[videoIndex];
+        // Remove .mp4 for the button and timer
+        const nextCleanName = nextFile.replace('.mp4', '');
+        
+        button.innerText = `Start ${nextCleanName} (Attempt ${repeatCount})`;
+        document.getElementById('timer').innerText = `Finished previous play. Next: ${nextCleanName} (Repeat ${repeatCount}/3)`;
+
+        startContainer.style.display = 'block';
+    } else {
+        document.getElementById('instructionBox').style.display = "none";
+        content.innerHTML = "<h2>All 15 videos and their repetitions are complete.</h2>";
+        document.getElementById('timer').innerText = "";
+        startContainer.style.display = 'none'; 
+    }
+}
+
+function attemptPlayback() {
+    const videoElement = document.getElementById('listeningVideo');
+    if(videoElement) {
+        videoElement.play().catch(e => console.error("Playback error:", e));
+        videoElement.removeEventListener('loadedmetadata', attemptPlayback);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('timer').innerText = "Click 'Start' to begin the task.";
+});
+</script>
+</body>
+</html>
