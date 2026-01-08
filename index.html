@@ -7,7 +7,6 @@
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   
-  /* Styling for the new instruction box */
   #instructionBox {
     margin: 20px auto;
     padding: 15px;
@@ -15,7 +14,30 @@
     border: 2px solid #333;
     background-color: #f9f9f9;
     font-weight: bold;
-    display: none; /* Hidden until task starts */
+    display: none;
+  }
+
+  /* Container to hold video and the page number overlay */
+  #videoWrapper {
+    position: relative;
+    display: inline-block;
+    width: 560px;
+    height: 315px;
+    background-color: #000;
+  }
+
+  /* Style for the Page Number in the corner */
+  #pageOverlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 10;
   }
 
   #content { display: none; } 
@@ -43,14 +65,18 @@
 <h1>Listening Task</h1>
 
 <div id="instructionBox"></div>
-
 <div id="timer"></div>
 
 <div id="startContainer">
   <button id="startButton" onclick="startTask()">Start Task</button>
 </div>
 
-<div id="content"></div>
+<div id="content">
+    <div id="videoWrapper">
+        <div id="pageOverlay"></div>
+        <div id="videoPlaceholder"></div>
+    </div>
+</div>
 
 <script>
 const videoFiles = [
@@ -63,12 +89,10 @@ let videoIndex = 0;
 let repeatCount = 1;   
 const totalRepeats = 3;
 
-// Function to determine which description to show
 function updateInstructionText() {
     const instructionBox = document.getElementById('instructionBox');
     const currentFile = videoFiles[videoIndex];
-    
-    instructionBox.style.display = "block"; // Make sure the box is visible
+    instructionBox.style.display = "block";
 
     if (currentFile.startsWith("Planes")) {
         instructionBox.innerText = "In the next five clips, we were discussing plane travel";
@@ -98,14 +122,18 @@ function getVideoHTML(videoSrc) {
 function startTask() {
     const startContainer = document.getElementById('startContainer');
     const content = document.getElementById('content');
+    const overlay = document.getElementById('pageOverlay');
     const currentFile = videoFiles[videoIndex];
 
     startContainer.style.display = 'none';
     content.style.display = 'block';
 
-    updateInstructionText(); // Set the description box text
+    updateInstructionText();
 
-    content.innerHTML = getVideoHTML(currentFile);
+    // Update the number in the corner (1 through 15)
+    overlay.innerText = "Video " + (videoIndex + 1);
+
+    document.getElementById('videoPlaceholder').innerHTML = getVideoHTML(currentFile);
     document.getElementById('timer').innerText = `Playing ${currentFile} (Attempt ${repeatCount} of ${totalRepeats})`;
 
     const videoElement = document.getElementById('listeningVideo');
@@ -126,7 +154,7 @@ function handleVideoEnd() {
     }
 
     if (videoIndex < videoFiles.length) {
-        content.innerHTML = "";
+        document.getElementById('videoPlaceholder').innerHTML = "";
         content.style.display = 'none'; 
 
         const nextFile = videoFiles[videoIndex];
@@ -135,7 +163,7 @@ function handleVideoEnd() {
 
         startContainer.style.display = 'block';
     } else {
-        document.getElementById('instructionBox').style.display = "none"; // Hide box at end
+        document.getElementById('instructionBox').style.display = "none";
         content.innerHTML = "<h2>All 15 videos and their repetitions are complete.</h2>";
         document.getElementById('timer').innerText = "";
         startContainer.style.display = 'none'; 
