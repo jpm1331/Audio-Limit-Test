@@ -80,9 +80,9 @@
 
 <script>
 const videoFiles = [
-  "Planes1.mp4", "Planes2.mp4", "Planes3.mp4", "Planes4.mp4", "Planes5.mp4",
-  "Trains1.mp4", "Trains2.mp4", "Trains3.mp4", "Trains4.mp4", "Trains5.mp4",
-  "Dance1.mp4", "Dance2.mp4", "Dance3.mp4", "Dance4.mp4", "Dance5.mp4"
+  "Planes Clip 1.mp4", "Planes Clip 2.mp4", "Planes Clip 3.mp4", "Planes Clip 4.mp4", "Planes Clip 5.mp4",
+  "Trains Clip 1.mp4", "Trains Clip 2.mp4", "Trains Clip 3.mp4", "Trains Clip 4.mp4", "Trains Clip 5.mp4",
+  "Dance Clip 1.mp4", "Dance Clip 2.mp4", "Dance Clip 3.mp4", "Dance Clip 4.mp4", "Dance Clip 5.mp4"
 ];
 
 let videoIndex = 0;    
@@ -95,11 +95,11 @@ function updateInstructionText() {
     instructionBox.style.display = "block";
 
     if (currentFile.startsWith("Planes")) {
-        instructionBox.innerText = "In the next five clips, we were discussing plane travel";
+        instructionBox.innerText = "In the next five clips, we are discussing plane travel";
     } else if (currentFile.startsWith("Trains")) {
-        instructionBox.innerText = "In the next five clips, we were discussing train travel";
+        instructionBox.innerText = "In the next five clips, we are discussing train travel";
     } else if (currentFile.startsWith("Dance")) {
-        instructionBox.innerText = "In the next five clips, we were discussing our wheelchair dance club";
+        instructionBox.innerText = "In the next five clips, we are discussing our wheelchair dance club";
     }
 }
 
