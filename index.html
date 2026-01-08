@@ -90,6 +90,13 @@ const totalRepeats = 3;
 function updateInstructionText() {
     const instructionBox = document.getElementById('instructionBox');
     const currentFile = videoFiles[videoIndex];
+    
+    if (!currentFile) {
+        instructionBox.style.display = "none";
+        instructionBox.innerText = "";
+        return;
+    }
+
     instructionBox.style.display = "block";
 
     if (currentFile.startsWith("Plane")) {
@@ -98,6 +105,45 @@ function updateInstructionText() {
         instructionBox.innerText = "In the next five clips, we are discussing train travel";
     } else if (currentFile.startsWith("Dance")) {
         instructionBox.innerText = "In the next five clips, we are discussing our wheelchair dance club";
+    } else {
+        // This is your "blank" fallback
+        instructionBox.innerText = "";
+        instructionBox.style.display = "none";
+    }
+}
+
+function handleVideoEnd() {
+    const startContainer = document.getElementById('startContainer');
+    const content = document.getElementById('content');
+    const button = document.getElementById('startButton');
+    const instructionBox = document.getElementById('instructionBox');
+
+    // 1. CLEAR the instruction text immediately when video ends
+    instructionBox.innerText = "";
+    instructionBox.style.display = "none";
+
+    if (repeatCount < totalRepeats) {
+        repeatCount++;
+    } else {
+        videoIndex++;
+        repeatCount = 1;
+    }
+
+    if (videoIndex < videoFiles.length) {
+        document.getElementById('videoPlaceholder').innerHTML = "";
+        content.style.display = 'none'; 
+
+        const nextFile = videoFiles[videoIndex];
+        const nextCleanName = nextFile.replace('.mp4', '');
+        
+        button.innerText = `Start ${nextCleanName} (Attempt ${repeatCount})`;
+        document.getElementById('timer').innerText = `Finished previous play. Next: ${nextCleanName} (Repeat ${repeatCount}/3)`;
+
+        startContainer.style.display = 'block';
+    } else {
+        content.innerHTML = "<h2>All 15 videos and their repetitions are complete.</h2>";
+        document.getElementById('timer').innerText = "";
+        startContainer.style.display = 'none'; 
     }
 }
 
@@ -143,37 +189,6 @@ function startTask() {
     if (videoElement.readyState >= 1) attemptPlayback();
 }
 
-function handleVideoEnd() {
-    const startContainer = document.getElementById('startContainer');
-    const content = document.getElementById('content');
-    const button = document.getElementById('startButton');
-
-    if (repeatCount < totalRepeats) {
-        repeatCount++;
-    } else {
-        videoIndex++;
-        repeatCount = 1;
-    }
-
-    if (videoIndex < videoFiles.length) {
-        document.getElementById('videoPlaceholder').innerHTML = "";
-        content.style.display = 'none'; 
-
-        const nextFile = videoFiles[videoIndex];
-        // Remove .mp4 for the button and timer
-        const nextCleanName = nextFile.replace('.mp4', '');
-        
-        button.innerText = `Start ${nextCleanName} (Attempt ${repeatCount})`;
-        document.getElementById('timer').innerText = `Finished previous play. Next: ${nextCleanName} (Repeat ${repeatCount}/3)`;
-
-        startContainer.style.display = 'block';
-    } else {
-        document.getElementById('instructionBox').style.display = "none";
-        content.innerHTML = "<h2>All 15 videos and their repetitions are complete.</h2>";
-        document.getElementById('timer').innerText = "";
-        startContainer.style.display = 'none'; 
-    }
-}
 
 function attemptPlayback() {
     const videoElement = document.getElementById('listeningVideo');
