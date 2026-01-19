@@ -7,15 +7,16 @@
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   
-  /* The specific Audio Test warning style */
+  /* Styling for the requested Audio Test warning */
   #testWarning {
-    background-color: #ffeded;
-    color: #d9534f;
+    background-color: #fff3cd;
+    color: #856404;
     padding: 15px;
-    border: 1px solid #d9534f;
-    margin-bottom: 20px;
+    border: 1px solid #ffeeba;
+    margin: 0 auto 20px;
+    width: 80%;
     font-weight: bold;
-    display: none; /* Hidden by default */
+    display: none; /* Only shown during test */
   }
 
   #instructionBox {
@@ -92,19 +93,18 @@
 <script>
 const videoFiles = [
   "Plane Clip 1.mp4", "Plane Clip 2.mp4", "Plane Clip 3.mp4", "Plane Clip 4.mp4", "Plane Clip 5.mp4",
-  "Train Clip 1.mp4", "Train Clip 2.mp4", "Train Clip 3.mp4", "Train Clip 4.mp4", "Train Clip 5.mp4",
-  "Dance Clip 1.mp4", "Dance Clip 2.mp4", "Dance Clip 3.mp4", "Dance Clip 4.mp4", "Dance Clip 5.mp4"
+  "Train Clip 1.mp4", "Train Clip 2.mp4", "Train Clip 3.mp4", "Train Clip 4.mp4", "Train Clip 5.mp4"
 ];
 
 let videoIndex = 0;    
 let repeatCount = 1;   
 const totalRepeats = 3;
-let isAudioTest = true; // State to track if we are in the test phase
+let isAudioTest = true; // Flag to track if we are in the initial test phase
 
 function updateInstructionText() {
     const instructionBox = document.getElementById('instructionBox');
     
-    // If it's the audio test, we don't need the bottom instruction box text
+    // Skip instruction box for the audio test
     if (isAudioTest) {
         instructionBox.style.display = "none";
         return;
@@ -113,7 +113,6 @@ function updateInstructionText() {
     const currentFile = videoFiles[videoIndex];
     if (!currentFile) {
         instructionBox.style.display = "none";
-        instructionBox.innerText = "";
         return;
     }
 
@@ -123,8 +122,6 @@ function updateInstructionText() {
         instructionBox.innerText = "In the next five clips, we are discussing plane travel";
     } else if (currentFile.startsWith("Train")) {
         instructionBox.innerText = "In the next five clips, we are discussing train travel";
-    } else if (currentFile.startsWith("Dance")) {
-        instructionBox.innerText = "In the next five clips, we are discussing our wheelchair dance club";
     } else {
         instructionBox.innerText = "";
         instructionBox.style.display = "none";
@@ -141,22 +138,23 @@ function handleVideoEnd() {
     instructionBox.innerText = "";
     instructionBox.style.display = "none";
 
-    // Handle end of Audio Test
+    // SPECIAL LOGIC: End of Audio Test
     if (isAudioTest) {
-        isAudioTest = false; // Move to main task
-        testWarning.style.display = "none"; // Remove warning
+        isAudioTest = false; // Turn off test mode
+        testWarning.style.display = "none"; // Hide warning
         
         document.getElementById('videoPlaceholder').innerHTML = "";
-        content.style.display = 'none'; 
+        content.style.display = 'none';
 
-        const nextFile = videoFiles[0].replace('.mp4', '');
-        button.innerText = `Start ${nextFile} (Attempt 1)`;
-        document.getElementById('timer').innerText = "Audio test complete. Click below to begin the task.";
+        // Prepare for the first real video
+        const firstFile = videoFiles[0].replace('.mp4', '');
+        button.innerText = `Start ${firstFile} (Attempt 1)`;
+        document.getElementById('timer').innerText = "Audio test finished. Click below to start the task.";
         startContainer.style.display = 'block';
-        return;
+        return; 
     }
 
-    // Standard repeat logic
+    // NORMAL LOGIC: Handle repetitions
     if (repeatCount < totalRepeats) {
         repeatCount++;
     } else {
@@ -176,7 +174,7 @@ function handleVideoEnd() {
 
         startContainer.style.display = 'block';
     } else {
-        content.innerHTML = "<h2>All 15 videos and their repetitions are complete.</h2>";
+        content.innerHTML = "<h2>All videos and their repetitions are complete.</h2>";
         document.getElementById('timer').innerText = "";
         startContainer.style.display = 'none'; 
     }
@@ -208,13 +206,13 @@ function startTask() {
     content.style.display = 'block';
 
     if (isAudioTest) {
-        // Play TestAudio.mp4 logic
+        // Run the audio test logic
         testWarning.style.display = "block";
-        overlay.innerText = "Test Audio";
+        overlay.innerText = "Audio Test";
         document.getElementById('videoPlaceholder').innerHTML = getVideoHTML("TestAudio.mp4");
         document.getElementById('timer').innerText = "Playing Audio Test...";
     } else {
-        // Regular video logic
+        // Run the standard task logic
         const currentFile = videoFiles[videoIndex];
         const cleanName = currentFile.replace('.mp4', '');
         overlay.innerText = "Video " + (videoIndex + 1);
