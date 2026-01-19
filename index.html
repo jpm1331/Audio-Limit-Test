@@ -7,6 +7,17 @@
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   #timer { font-size: 24px; color: red; margin-bottom: 20px; }
   
+  /* The specific Audio Test warning style */
+  #testWarning {
+    background-color: #ffeded;
+    color: #d9534f;
+    padding: 15px;
+    border: 1px solid #d9534f;
+    margin-bottom: 20px;
+    font-weight: bold;
+    display: none; /* Hidden by default */
+  }
+
   #instructionBox {
     margin: 20px auto;
     padding: 15px;
@@ -60,13 +71,15 @@
 </head>
 <body>
 
+<div id="testWarning">Audio Test: If you cannot hear any sounds coming from your speakers please adjust your audio settings and refresh the page.</div>
+
 <h1>Listening Task</h1>
 
 <div id="instructionBox"></div>
 <div id="timer"></div>
 
 <div id="startContainer">
-  <button id="startButton" onclick="startTask()">Start Task</button>
+  <button id="startButton" onclick="startTask()">Start Audio Test</button>
 </div>
 
 <div id="content">
@@ -86,11 +99,18 @@ const videoFiles = [
 let videoIndex = 0;    
 let repeatCount = 1;   
 const totalRepeats = 3;
+let isAudioTest = true; // State to track if we are in the test phase
 
 function updateInstructionText() {
     const instructionBox = document.getElementById('instructionBox');
-    const currentFile = videoFiles[videoIndex];
     
+    // If it's the audio test, we don't need the bottom instruction box text
+    if (isAudioTest) {
+        instructionBox.style.display = "none";
+        return;
+    }
+
+    const currentFile = videoFiles[videoIndex];
     if (!currentFile) {
         instructionBox.style.display = "none";
         instructionBox.innerText = "";
@@ -106,7 +126,6 @@ function updateInstructionText() {
     } else if (currentFile.startsWith("Dance")) {
         instructionBox.innerText = "In the next five clips, we are discussing our wheelchair dance club";
     } else {
-        // This is your "blank" fallback
         instructionBox.innerText = "";
         instructionBox.style.display = "none";
     }
@@ -117,11 +136,27 @@ function handleVideoEnd() {
     const content = document.getElementById('content');
     const button = document.getElementById('startButton');
     const instructionBox = document.getElementById('instructionBox');
+    const testWarning = document.getElementById('testWarning');
 
-    // 1. CLEAR the instruction text immediately when video ends
     instructionBox.innerText = "";
     instructionBox.style.display = "none";
 
+    // Handle end of Audio Test
+    if (isAudioTest) {
+        isAudioTest = false; // Move to main task
+        testWarning.style.display = "none"; // Remove warning
+        
+        document.getElementById('videoPlaceholder').innerHTML = "";
+        content.style.display = 'none'; 
+
+        const nextFile = videoFiles[0].replace('.mp4', '');
+        button.innerText = `Start ${nextFile} (Attempt 1)`;
+        document.getElementById('timer').innerText = "Audio test complete. Click below to begin the task.";
+        startContainer.style.display = 'block';
+        return;
+    }
+
+    // Standard repeat logic
     if (repeatCount < totalRepeats) {
         repeatCount++;
     } else {
@@ -167,28 +202,32 @@ function startTask() {
     const startContainer = document.getElementById('startContainer');
     const content = document.getElementById('content');
     const overlay = document.getElementById('pageOverlay');
-    const currentFile = videoFiles[videoIndex];
-    
-    // Remove .mp4 for the display text
-    const cleanName = currentFile.replace('.mp4', '');
+    const testWarning = document.getElementById('testWarning');
 
     startContainer.style.display = 'none';
     content.style.display = 'block';
 
+    if (isAudioTest) {
+        // Play TestAudio.mp4 logic
+        testWarning.style.display = "block";
+        overlay.innerText = "Test Audio";
+        document.getElementById('videoPlaceholder').innerHTML = getVideoHTML("TestAudio.mp4");
+        document.getElementById('timer').innerText = "Playing Audio Test...";
+    } else {
+        // Regular video logic
+        const currentFile = videoFiles[videoIndex];
+        const cleanName = currentFile.replace('.mp4', '');
+        overlay.innerText = "Video " + (videoIndex + 1);
+        document.getElementById('videoPlaceholder').innerHTML = getVideoHTML(currentFile);
+        document.getElementById('timer').innerText = `Playing ${cleanName} (Attempt ${repeatCount} of ${totalRepeats})`;
+    }
+
     updateInstructionText();
-
-    overlay.innerText = "Video " + (videoIndex + 1);
-
-    document.getElementById('videoPlaceholder').innerHTML = getVideoHTML(currentFile);
-    
-    // Updated text to use cleanName
-    document.getElementById('timer').innerText = `Playing ${cleanName} (Attempt ${repeatCount} of ${totalRepeats})`;
 
     const videoElement = document.getElementById('listeningVideo');
     videoElement.addEventListener('loadedmetadata', attemptPlayback);
     if (videoElement.readyState >= 1) attemptPlayback();
 }
-
 
 function attemptPlayback() {
     const videoElement = document.getElementById('listeningVideo');
@@ -199,7 +238,7 @@ function attemptPlayback() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('timer').innerText = "Click 'Start' to begin the task.";
+    document.getElementById('timer').innerText = "Click 'Start Audio Test' to begin.";
 });
 </script>
 </body>
